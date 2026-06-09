@@ -1,0 +1,59 @@
+name: Deploy admin (dev)
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'admin/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/deploy-admin-dev.yml'
+
+concurrency:
+  group: deploy-admin-dev
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      SSH_HOST: 8.210.195.66
+      SSH_USER: root
+      DEPLOY_PATH: /www/wwwroot/ts.cancan.asia/admin
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build admin
+        run: VITE_BASE=/admin/ npm run build:admin
+
+      - name: Setup SSH key
+        run: |
+          install -m 600 -d ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+            "${SSH_USER}@${SSH_HOST}" "mkdir -p '${DEPLOY_PATH}'"
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            admin/dist/ "${SSH_USER}@${SSH_HOST}:${DEPLOY_PATH}/"
+
+      - name: Remove SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
