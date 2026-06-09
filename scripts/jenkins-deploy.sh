@@ -25,9 +25,11 @@ if [[ ! -d "$REPO_ROOT/apisrv/dist" ]]; then
 fi
 
 echo "========== sync artifacts =========="
+mkdir -p "$DEPLOY_DIR"
+rm -rf "$DEPLOY_DIR/dist"
 mkdir -p "$DEPLOY_DIR/dist"
-rsync -a --delete "$REPO_ROOT/apisrv/dist/" "$DEPLOY_DIR/dist/"
-rsync -a "$REPO_ROOT/apisrv/package.json" "$DEPLOY_DIR/"
+cp -r "$REPO_ROOT/apisrv/dist/." "$DEPLOY_DIR/dist/"
+cp "$REPO_ROOT/apisrv/package.json" "$DEPLOY_DIR/"
 
 echo "========== install production deps =========="
 # apisrv 无独立 package-lock.json，使用 npm install --omit=dev
