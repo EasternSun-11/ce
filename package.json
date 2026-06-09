@@ -16,8 +16,7 @@
     "build:admin": "npm run build -w @ui-app/admin",
     "build:client": "npm run build:h5 -w @ui-app/client",
     "test": "npm run test:unit -w @ui-app/client",
-    "type-check": "npm run type-check -w @ui-app/apisrv && npm run type-check -w @ui-app/admin && npm run type-check -w @ui-app/client",
-    "deploy:jenkins": "node scripts/jenkins-deploy.mjs"
+    "type-check": "npm run type-check -w @ui-app/apisrv && npm run type-check -w @ui-app/admin && npm run type-check -w @ui-app/client"
   },
   "overrides": {
     "vue": "3.4.21",

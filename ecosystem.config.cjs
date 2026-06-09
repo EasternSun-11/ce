@@ -3,7 +3,7 @@ module.exports = {
   apps: [
     {
       name: 'ui-app-apisrv',
-      cwd: './apisrv',
+      cwd: process.env.DEPLOY_DIR || '/opt/ui-app/apisrv',
       script: 'dist/index.js',
       instances: 1,
       autorestart: true,

@@ -2,9 +2,8 @@ pipeline {
   agent any
 
   environment {
-    PM2_APP = 'ui-app-apisrv'
-    // Jenkins 已通过 SCM 检出代码时可跳过 git pull
-    // SKIP_GIT_PULL = '1'
+    DEPLOY_DIR = '/opt/ui-app/apisrv'
+    PM2_APP_NAME = 'ui-app-apisrv'
   }
 
   options {
@@ -13,25 +12,30 @@ pipeline {
   }
 
   stages {
+    stage('Install') {
+      steps {
+        sh 'npm ci'
+      }
+    }
+    stage('Build') {
+      steps {
+        sh 'npm run build:apisrv'
+      }
+    }
     stage('Deploy') {
       steps {
-        script {
-          if (isUnix()) {
-            sh 'node scripts/jenkins-deploy.mjs'
-          } else {
-            bat 'node scripts\\jenkins-deploy.mjs'
-          }
-        }
+        sh 'chmod +x scripts/jenkins-deploy.sh'
+        sh 'SKIP_BUILD=1 ./scripts/jenkins-deploy.sh'
       }
     }
   }
 
   post {
     success {
-      echo '部署成功'
+      echo 'API 部署成功'
     }
     failure {
-      echo '部署失败，请查看上方日志'
+      echo '部署失败，查看 Jenkins 日志'
     }
   }
 }

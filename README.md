@@ -50,6 +50,10 @@ docs/            # 共享文档
 
 切换 Mock：编辑 `client/.env.development` 中的 `VITE_USE_MOCK`。
 
+## 部署
+
+Jenkins + 1Panel 自动构建部署 API 见 [`docs/DEPLOY.md`](docs/DEPLOY.md)。
+
 ## API 概览
 
 - `GET /` — 服务信息
