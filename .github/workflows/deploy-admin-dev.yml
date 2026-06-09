@@ -34,10 +34,15 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          # lock 在 Windows 生成时，Linux CI 上 npm ci 可能漏装 rollup 原生包
+          npm install @rollup/rollup-linux-x64-gnu --no-save
 
       - name: Build admin
-        run: VITE_BASE=/admin/ npm run build:admin
+        env:
+          VITE_BASE: /admin/
+        run: npm run build:admin
 
       - name: Setup SSH key
         run: |
