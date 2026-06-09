@@ -1,0 +1,26 @@
+{
+  "name": "ui-app",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apisrv",
+    "admin",
+    "client"
+  ],
+  "scripts": {
+    "dev:apisrv": "npm run dev -w @ui-app/apisrv",
+    "dev:admin": "npm run dev -w @ui-app/admin",
+    "dev:client": "npm run dev:h5 -w @ui-app/client",
+    "dev:client:weixin": "npm run dev:mp-weixin -w @ui-app/client",
+    "build:apisrv": "npm run build -w @ui-app/apisrv",
+    "build:admin": "npm run build -w @ui-app/admin",
+    "build:client": "npm run build:h5 -w @ui-app/client",
+    "test": "npm run test:unit -w @ui-app/client",
+    "type-check": "npm run type-check -w @ui-app/apisrv && npm run type-check -w @ui-app/admin && npm run type-check -w @ui-app/client",
+    "deploy:jenkins": "node scripts/jenkins-deploy.mjs"
+  },
+  "overrides": {
+    "vue": "3.4.21",
+    "vue-router": "4.4.4"
+  }
+}

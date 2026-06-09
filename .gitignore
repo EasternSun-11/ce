@@ -1,0 +1,45 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+.DS_Store
+dist
+unpackage
+client/dist
+admin/dist
+apisrv/dist
+client/unpackage
+client/android-offline/keystore/
+client/android-offline/output/
+client/android-offline/signing.env
+client/android-offline/HBuilder-Integrate-AS/
+client/android-offline/Android-SDK/
+android-offline/keystore/
+android-offline/output/
+android-offline/signing.env
+android-offline/HBuilder-Integrate-AS/
+android-offline/Android-SDK/
+*.local
+.env
+.env.*
+!.env.example
+
+# Cursor skills (local only)
+.cursor/skills/
+
+# Test output
+test-results/
+
+# Editor directories and files
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

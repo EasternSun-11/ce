@@ -1,0 +1,23 @@
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_API_BASE_URL: string
+  readonly VITE_USE_MOCK: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}
+
+declare const process: {
+  env: {
+    UNI_PLATFORM?: string
+    [key: string]: string | undefined
+  }
+}
+
+declare module '*.vue' {
+  import { DefineComponent } from 'vue'
+  const component: DefineComponent<{}, {}, unknown>
+  export default component
+}

@@ -1,0 +1,34 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationBarTitleText": "登录",
+        "navigationBarBackgroundColor": "#F5F3FF",
+        "backgroundColor": "#F5F3FF"
+      }
+    },
+    {
+      "path": "pages/register/register",
+      "style": {
+        "navigationBarTitleText": "注册",
+        "navigationBarBackgroundColor": "#F5F3FF",
+        "backgroundColor": "#F5F3FF"
+      }
+    },
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "首页",
+        "navigationBarBackgroundColor": "#F5F3FF",
+        "backgroundColor": "#F5F3FF"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "UI App",
+    "navigationBarBackgroundColor": "#F5F3FF",
+    "backgroundColor": "#F5F3FF"
+  }
+}
