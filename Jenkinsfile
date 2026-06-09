@@ -6,8 +6,10 @@ pipeline {
   }
 
   environment {
-    DEPLOY_DIR = '/opt/ui-app/apisrv'
-    PM2_APP_NAME = 'ui-app-apisrv'
+    DEPLOY_DIR_APISRV = '/opt/ui-app/apisrv'
+    DEPLOY_DIR_ADMIN = '/opt/ui-app/admin'
+    DEPLOY_DIR_CLIENT = '/opt/ui-app/client'
+    SKIP_PM2 = '1'
   }
 
   triggers {
@@ -31,6 +33,8 @@ pipeline {
     stage('Build') {
       steps {
         sh 'npm run build:apisrv'
+        sh 'npm run build:admin'
+        sh 'npm run build:client'
       }
     }
 
@@ -44,7 +48,7 @@ pipeline {
 
   post {
     success {
-      echo "API 部署成功: ${DEPLOY_DIR}"
+      echo "部署成功: apisrv=${DEPLOY_DIR_APISRV}, admin=${DEPLOY_DIR_ADMIN}, client=${DEPLOY_DIR_CLIENT}"
     }
     failure {
       echo '流水线执行失败，请查看上方日志'

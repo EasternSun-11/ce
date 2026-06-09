@@ -1,44 +1,65 @@
 #!/usr/bin/env bash
-# Jenkins 部署：构建 apisrv → 同步产物到 DEPLOY_DIR → 安装生产依赖 → pm2 restart
+# Jenkins 部署：构建 apisrv / admin / client → 同步产物到部署目录
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-DEPLOY_DIR="${DEPLOY_DIR:-/opt/ui-app/apisrv}"
+
+DEPLOY_DIR_APISRV="${DEPLOY_DIR_APISRV:-${DEPLOY_DIR:-/opt/ui-app/apisrv}}"
+DEPLOY_DIR_ADMIN="${DEPLOY_DIR_ADMIN:-/opt/ui-app/admin}"
+DEPLOY_DIR_CLIENT="${DEPLOY_DIR_CLIENT:-/opt/ui-app/client}"
+
+BUILD_DIR_APISRV="${BUILD_DIR_APISRV:-apisrv/dist}"
+BUILD_DIR_ADMIN="${BUILD_DIR_ADMIN:-admin/dist}"
+BUILD_DIR_CLIENT="${BUILD_DIR_CLIENT:-client/dist/build/h5}"
+
 PM2_APP_NAME="${PM2_APP_NAME:-ui-app-apisrv}"
-PM2_ECOSYSTEM="${PM2_ECOSYSTEM:-$DEPLOY_DIR/ecosystem.config.cjs}"
+PM2_ECOSYSTEM="${PM2_ECOSYSTEM:-$DEPLOY_DIR_APISRV/ecosystem.config.cjs}"
 SKIP_BUILD="${SKIP_BUILD:-}"
-SKIP_PM2="${SKIP_PM2:-}"
+SKIP_PM2="${SKIP_PM2:-1}"
 PM2_RESTART_CMD="${PM2_RESTART_CMD:-}"
 
+sync_static() {
+  local label="$1"
+  local src="$2"
+  local dest="$3"
+
+  if [[ ! -d "$src" ]]; then
+    echo "错误: ${label} 构建产物不存在: $src"
+    exit 1
+  fi
+
+  echo "========== sync ${label} → ${dest} =========="
+  mkdir -p "$dest"
+  rm -rf "${dest:?}"/*
+  cp -r "${src}/." "${dest}/"
+}
+
 echo "[Deploy] 仓库目录: $REPO_ROOT"
-echo "[Deploy] 运行目录: $DEPLOY_DIR"
-echo "[Deploy] PM2 应用: $PM2_APP_NAME"
+echo "[Deploy] apisrv → $DEPLOY_DIR_APISRV"
+echo "[Deploy] admin  → $DEPLOY_DIR_ADMIN"
+echo "[Deploy] client → $DEPLOY_DIR_CLIENT"
 
 if [[ "$SKIP_BUILD" != "1" ]]; then
-  echo "========== build apisrv =========="
+  echo "========== build all =========="
   (cd "$REPO_ROOT" && npm run build:apisrv)
+  (cd "$REPO_ROOT" && npm run build:admin)
+  (cd "$REPO_ROOT" && npm run build:client)
 else
-  echo "[SKIP] build apisrv (SKIP_BUILD=1)"
+  echo "[SKIP] build (SKIP_BUILD=1)"
 fi
 
-if [[ ! -d "$REPO_ROOT/apisrv/dist" ]]; then
-  echo "错误: 构建产物不存在: $REPO_ROOT/apisrv/dist"
-  exit 1
-fi
+sync_static "apisrv" "$REPO_ROOT/$BUILD_DIR_APISRV" "$DEPLOY_DIR_APISRV/dist"
+cp "$REPO_ROOT/apisrv/package.json" "$DEPLOY_DIR_APISRV/"
+cp "$REPO_ROOT/ecosystem.config.cjs" "$DEPLOY_DIR_APISRV/"
 
-echo "========== sync artifacts =========="
-mkdir -p "$DEPLOY_DIR"
-rm -rf "$DEPLOY_DIR/dist"
-mkdir -p "$DEPLOY_DIR/dist"
-cp -r "$REPO_ROOT/apisrv/dist/." "$DEPLOY_DIR/dist/"
-cp "$REPO_ROOT/apisrv/package.json" "$DEPLOY_DIR/"
-cp "$REPO_ROOT/ecosystem.config.cjs" "$DEPLOY_DIR/"
+echo "========== install apisrv production deps =========="
+(cd "$DEPLOY_DIR_APISRV" && npm install --omit=dev)
 
-echo "========== install production deps =========="
-(cd "$DEPLOY_DIR" && npm install --omit=dev)
+sync_static "admin" "$REPO_ROOT/$BUILD_DIR_ADMIN" "$DEPLOY_DIR_ADMIN"
+sync_static "client" "$REPO_ROOT/$BUILD_DIR_CLIENT" "$DEPLOY_DIR_CLIENT"
 
 if [[ "$SKIP_PM2" == "1" ]]; then
-  echo "[SKIP] pm2 (SKIP_PM2=1)，产物已同步到 ${DEPLOY_DIR}"
+  echo "[SKIP] pm2 (SKIP_PM2=1)"
   echo "========== deploy done =========="
   exit 0
 fi
@@ -53,7 +74,7 @@ ensure_pm2() {
 }
 
 echo "========== pm2 restart =========="
-export DEPLOY_DIR
+export DEPLOY_DIR="$DEPLOY_DIR_APISRV"
 
 if [[ -n "$PM2_RESTART_CMD" ]]; then
   echo "[INFO] 使用自定义重启命令: $PM2_RESTART_CMD"
