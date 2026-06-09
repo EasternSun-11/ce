@@ -26,7 +26,11 @@ pipeline {
     stage('Install') {
       steps {
         sh 'node -v && npm -v'
-        sh 'npm ci || npm i'
+        sh '''
+          npm ci || npm i
+          # lock 在 Windows 生成时，Linux CI 上 npm ci 可能漏装 rollup 原生包
+          npm install @rollup/rollup-linux-x64-gnu @rollup/rollup-linux-x64-musl --no-save
+        '''
       }
     }
 
